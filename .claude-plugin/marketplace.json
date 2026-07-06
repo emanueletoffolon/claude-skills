@@ -35,6 +35,11 @@
       "name": "senior-engineer",
       "source": "./senior-engineer-plugin",
       "description": "Cinque command per valutare e investigare il codice dal punto di vista di un senior engineer: /audit, /debug, /refactor, /security, /techlead."
+    },
+    {
+      "name": "master-docs",
+      "source": "./master-docs-plugin",
+      "description": "Flusso graphify + docs per progetti Master Laravel Enesi e app Ionic/Capacitor. FAMIGLIA MASTER: /master-setup, /master-graph, /master-docs-sync, /documenta-moduli. FAMIGLIA IONIC: /ionic-setup, /ionic-graph, /ionic-vault. Knowledge graph con autosync post-commit (gratis) e documentazione dei moduli on-demand (deep-dive LLM o vault Obsidian). Installa graphify se assente."
     }
   ]
 }

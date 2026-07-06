@@ -1,0 +1,19 @@
+{
+  "name": "master-docs",
+  "version": "1.6.0",
+  "description": "Strumenti di sviluppo per il flusso graphify + docs. FAMIGLIA MASTER (Laravel Enesi): /master-setup, /master-graph, /master-docs-sync, /documenta-moduli (genera da zero i deep-dive dei moduli — un .md per modulo + indice + registro dubbi, via workflow multi-agente). FAMIGLIA IONIC (app Ionic + Capacitor / Angular): /ionic-setup (bootstrap grafo + autosync + vault), /ionic-graph (knowledge graph con scope src/, autosync post-commit), /ionic-vault (vault Obsidian navigabile della documentazione a mano, wikilink + MOC, gratis). Installa graphify in automatico se assente.",
+  "author": {
+    "name": "Emanuele Toffolon",
+    "email": "emanuele.toffolon@enesi.it"
+  },
+  "keywords": ["master", "laravel", "enesi", "ionic", "capacitor", "angular", "graphify", "knowledge-graph", "obsidian", "documentation", "setup"],
+  "commands": [
+    "./commands/master-setup.md",
+    "./commands/master-graph.md",
+    "./commands/master-docs-sync.md",
+    "./commands/documenta-moduli.md",
+    "./commands/ionic-setup.md",
+    "./commands/ionic-graph.md",
+    "./commands/ionic-vault.md"
+  ]
+}

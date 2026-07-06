@@ -17,6 +17,7 @@ Questo repository raccoglie un insieme di plugin (skill e command) pensati per a
   - [seo-geo-aeo](#seo-geo-aeo)
   - [perf-audit](#perf-audit)
   - [senior-engineer](#senior-engineer)
+  - [master-docs](#master-docs)
 - [Struttura del repository](#struttura-del-repository)
 - [Changelog](#changelog)
 - [Sviluppo e contributi](#sviluppo-e-contributi)
@@ -47,6 +48,7 @@ claude plugin install jira-worker
 claude plugin install seo-geo-aeo
 claude plugin install perf-audit
 claude plugin install senior-engineer
+claude plugin install master-docs
 ```
 
 Per aggiornare un plugin già installato:
@@ -67,6 +69,7 @@ claude plugin update <nome-plugin>
 | [`seo-geo-aeo`](#seo-geo-aeo) | Command | 3.0.0 | `/seo-report`: report SEO / GEO / AEO orchestrato su `claude-seo`, in italiano con design system Enesi (PDF) |
 | [`perf-audit`](#perf-audit) | Command | 1.0.0 | Audit di performance a imbuto per siti Master Laravel Enesi, con report prioritizzato |
 | [`senior-engineer`](#senior-engineer) | Command | 1.0.0 | Cinque command di valutazione del codice dal punto di vista di un senior engineer |
+| [`master-docs`](#master-docs) | Command | 1.6.0 | Flusso `graphify` + docs (knowledge graph + documentazione moduli) per progetti Master Laravel e app Ionic |
 
 ---
 
@@ -243,6 +246,52 @@ claude plugin install senior-engineer
 
 ---
 
+### master-docs
+
+Sette command per il flusso **`graphify` + docs**: costruzione del **knowledge graph** del progetto, refresh automatico a ogni commit e **documentazione dei moduli** (deep-dive LLM o vault Obsidian). Copre due famiglie di progetti.
+
+**Famiglia MASTER** (progetti Master Laravel Enesi, app in `private/`):
+
+| Command | Cosa fa |
+|---------|---------|
+| `/master-docs:master-setup` | Setup one-shot idempotente: grafo (scope `private/`) + autosync post-commit + bootstrap `docs/moduli/` se i deep-dive mancano |
+| `/master-docs:master-graph` | Crea/aggiorna il knowledge graph `graphify`, autosync `post-commit` opzionale, community nominate gratis via claude-cli |
+| `/master-docs:master-docs-sync` | Rigenera **solo** i deep-dive dei moduli cambiati (stale o mancanti) — on-demand, mai automatico ai commit |
+| `/master-docs:documenta-moduli` | Genera da zero i deep-dive dei moduli — un `.md` per modulo + indice + registro dubbi, via workflow multi-agente |
+
+**Famiglia IONIC** (app Ionic + Capacitor / Angular, app in `src/`):
+
+| Command | Cosa fa |
+|---------|---------|
+| `/master-docs:ionic-setup` | Setup one-shot idempotente: grafo (scope `src/`) + autosync post-commit + vault Obsidian della documentazione |
+| `/master-docs:ionic-graph` | Crea/aggiorna il knowledge graph `graphify` con scope `src/`, autosync `post-commit` opzionale |
+| `/master-docs:ionic-vault` | Rende la documentazione scritta a mano (`.claude/features` + `.claude/analysis`) un vault Obsidian navigabile (MOC + wikilink), locale e gratis, senza riscrivere le schede |
+
+**Idea di fondo — grafo gratis, docs on-demand.** Il grafo si costruisce con AST (nessun LLM): aggiornarlo a ogni commit costa secondi, quindi resta sempre fresco via git hook `post-commit`. La documentazione deep-dive costa chiamate LLM: per questo `master-docs-sync` rigenera **solo** i moduli cambiati e non viene **mai** agganciata al commit.
+
+**Installazione e utilizzo:**
+
+```bash
+claude plugin install master-docs
+```
+
+```
+# progetto Master, tutto in un colpo:
+/master-docs:master-setup
+
+# uso quotidiano:
+graphify query|explain|path
+/master-docs:master-graph --update    # refresh incrementale del grafo (gratis)
+/master-docs:master-docs-sync         # rinfresca i deep-dive dei soli moduli cambiati
+
+# app Ionic:
+/master-docs:ionic-setup
+```
+
+**Requisiti:** `graphify` (installato in automatico se assente), `claude-cli` (per la nomina gratuita delle community del grafo), git inizializzato (per l'autosync `post-commit`).
+
+---
+
 ## Struttura del repository
 
 ```
@@ -279,6 +328,17 @@ claude-skills/
 │   │   ├── refactor.md
 │   │   ├── security.md
 │   │   └── techlead.md
+│   └── README.md
+├── master-docs-plugin/
+│   ├── .claude-plugin/plugin.json
+│   ├── commands/
+│   │   ├── master-setup.md
+│   │   ├── master-graph.md
+│   │   ├── master-docs-sync.md
+│   │   ├── documenta-moduli.md
+│   │   ├── ionic-setup.md
+│   │   ├── ionic-graph.md
+│   │   └── ionic-vault.md
 │   └── README.md
 └── README.md                     ← questo file
 ```
@@ -320,6 +380,10 @@ Aggiornamenti notevoli dei plugin. La versione corrente di ogni plugin è nella 
 ### senior-engineer
 
 - **1.0.0** — Release iniziale: cinque command (`audit`, `debug`, `refactor`, `security`, `techlead`) che simulano i ruoli di un senior engineer, pensati per capire e valutare il codice prima di modificarlo.
+
+### master-docs
+
+- **1.6.0** — Integrazione nel marketplace Enesi del plugin per il flusso `graphify` + docs (in origine `devtoff`). Sette command su due famiglie: MASTER (`master-setup`, `master-graph`, `master-docs-sync`, `documenta-moduli`) e IONIC (`ionic-setup`, `ionic-graph`, `ionic-vault`). Knowledge graph con autosync `post-commit` (gratis, AST) e documentazione dei moduli on-demand (deep-dive LLM o vault Obsidian). Installa `graphify` in automatico se assente.
 
 ---
 
