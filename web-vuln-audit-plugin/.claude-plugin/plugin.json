@@ -1,0 +1,22 @@
+{
+  "name": "web-vuln-audit",
+  "version": "1.0.0",
+  "description": "Audit di vulnerabilità dinamico (DAST) a imbuto su un sito web live: passivo su qualsiasi dominio, attivo solo su domini autorizzati, con report finale prioritizzato e mappatura OWASP.",
+  "author": {
+    "name": "Enesi"
+  },
+  "keywords": [
+    "security",
+    "vulnerability",
+    "dast",
+    "owasp",
+    "audit",
+    "web-security",
+    "penetration-testing",
+    "tls",
+    "security-headers"
+  ],
+  "commands": [
+    "./commands/vuln-audit.md"
+  ]
+}

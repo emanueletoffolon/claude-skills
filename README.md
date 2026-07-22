@@ -18,6 +18,7 @@ Questo repository raccoglie un insieme di plugin (skill e command) pensati per a
   - [perf-audit](#perf-audit)
   - [senior-engineer](#senior-engineer)
   - [master-docs](#master-docs)
+  - [web-vuln-audit](#web-vuln-audit)
 - [Struttura del repository](#struttura-del-repository)
 - [Changelog](#changelog)
 - [Sviluppo e contributi](#sviluppo-e-contributi)
@@ -49,6 +50,7 @@ claude plugin install seo-geo-aeo
 claude plugin install perf-audit
 claude plugin install senior-engineer
 claude plugin install master-docs
+claude plugin install web-vuln-audit
 ```
 
 Per aggiornare un plugin già installato:
@@ -70,6 +72,7 @@ claude plugin update <nome-plugin>
 | [`perf-audit`](#perf-audit) | Command | 1.0.0 | Audit di performance a imbuto per siti Master Laravel Enesi, con report prioritizzato |
 | [`senior-engineer`](#senior-engineer) | Command | 1.0.0 | Cinque command di valutazione del codice dal punto di vista di un senior engineer |
 | [`master-docs`](#master-docs) | Command | 1.6.0 | Flusso `graphify` + docs (knowledge graph + documentazione moduli) per progetti Master Laravel e app Ionic |
+| [`web-vuln-audit`](#web-vuln-audit) | Command | 1.0.0 | `/vuln-audit`: audit di vulnerabilità dinamico (DAST) di un sito web live, passivo/attivo, con report OWASP |
 
 ---
 
@@ -292,6 +295,34 @@ graphify query|explain|path
 
 ---
 
+### web-vuln-audit
+
+Command `/vuln-audit` per un **audit di vulnerabilità dinamico (DAST)** su un **sito web in esecuzione**: sonda il sito dall'esterno (black-box) e produce un report prioritizzato con mappatura OWASP. È il complemento *runtime* di `/senior-engineer:security` (che invece analizza il **codice sorgente**, white-box).
+
+Il cardine sono le **due modalità**:
+
+| Modalità | Quando | Cosa fa |
+|----------|--------|---------|
+| **Passiva** (default) | Qualsiasi dominio, anche di terzi | Solo osservazione non intrusiva: security header, TLS/SSL, cookie flag, esposizione di file sensibili (`.env`, `.git`, dump), directory listing, debug mode, CORS, check specifici per stack (Laravel, WordPress) |
+| **Attiva** (`--active`) | **Solo** domini gestiti dall'utente o autorizzati | Aggiunge `nmap`, `nikto`, OWASP ZAP, `nuclei`, `sqlmap` mirato, con **doppia conferma** prima di lanciare i tool intrusivi |
+
+**Autorizzazione (regola zero):** scansionare un sistema non proprio senza consenso può essere illegale (art. 615-ter c.p.). Il comando chiede sempre conferma, resta in passiva finché non è autorizzato, vieta la modalità attiva su target di terzi e non esegue mai test distruttivi (DoS, modifica dati, prove su checkout, brute-force). Audit ampi vengono delegati a **subagenti read-only paralleli** che restituiscono solo riassunti strutturati.
+
+**Installazione:**
+
+```bash
+claude plugin install web-vuln-audit
+```
+
+**Utilizzo:**
+
+```
+/vuln-audit https://www.sito.it                 # passiva (sicura ovunque)
+/vuln-audit https://staging.sito.it --active    # attiva (solo domini autorizzati)
+```
+
+---
+
 ## Struttura del repository
 
 ```
@@ -340,6 +371,10 @@ claude-skills/
 │   │   ├── ionic-graph.md
 │   │   └── ionic-vault.md
 │   └── README.md
+├── web-vuln-audit-plugin/
+│   ├── .claude-plugin/plugin.json
+│   ├── commands/vuln-audit.md
+│   └── README.md
 └── README.md                     ← questo file
 ```
 
@@ -384,6 +419,10 @@ Aggiornamenti notevoli dei plugin. La versione corrente di ogni plugin è nella 
 ### master-docs
 
 - **1.6.0** — Integrazione nel marketplace Enesi del plugin per il flusso `graphify` + docs (in origine `devtoff`). Sette command su due famiglie: MASTER (`master-setup`, `master-graph`, `master-docs-sync`, `documenta-moduli`) e IONIC (`ionic-setup`, `ionic-graph`, `ionic-vault`). Knowledge graph con autosync `post-commit` (gratis, AST) e documentazione dei moduli on-demand (deep-dive LLM o vault Obsidian). Installa `graphify` in automatico se assente.
+
+### web-vuln-audit
+
+- **1.0.0** — Release iniziale: command `/vuln-audit` per l'audit di vulnerabilità dinamico (DAST) a imbuto (ricognizione → superficie → profondità) su un sito web live. Due modalità (passiva su qualsiasi dominio, attiva solo su domini autorizzati con `nmap`/`nikto`/ZAP/`nuclei`/`sqlmap`), regola zero di autorizzazione con doppia conferma, fan-out su subagenti read-only e report finale prioritizzato con mappatura OWASP Top 10 e separazione quick-win vs interventi strutturali.
 
 ---
 
