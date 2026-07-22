@@ -19,6 +19,7 @@ Questo repository raccoglie un insieme di plugin (skill e command) pensati per a
   - [senior-engineer](#senior-engineer)
   - [master-docs](#master-docs)
   - [web-vuln-audit](#web-vuln-audit)
+  - [security-report](#security-report)
 - [Struttura del repository](#struttura-del-repository)
 - [Changelog](#changelog)
 - [Sviluppo e contributi](#sviluppo-e-contributi)
@@ -51,6 +52,7 @@ claude plugin install perf-audit
 claude plugin install senior-engineer
 claude plugin install master-docs
 claude plugin install web-vuln-audit
+claude plugin install security-report
 ```
 
 Per aggiornare un plugin già installato:
@@ -73,6 +75,7 @@ claude plugin update <nome-plugin>
 | [`senior-engineer`](#senior-engineer) | Command | 1.0.0 | Cinque command di valutazione del codice dal punto di vista di un senior engineer |
 | [`master-docs`](#master-docs) | Command | 1.6.0 | Flusso `graphify` + docs (knowledge graph + documentazione moduli) per progetti Master Laravel e app Ionic |
 | [`web-vuln-audit`](#web-vuln-audit) | Command | 1.0.0 | `/vuln-audit`: audit di vulnerabilità dinamico (DAST) di un sito web live, passivo/attivo, con report OWASP |
+| [`security-report`](#security-report) | Command | 1.0.0 | `/security-report`: report di sicurezza unificato che orchestra SAST/DAST/segreti/dipendenze/container, con conferma dei controlli |
 
 ---
 
@@ -323,6 +326,40 @@ claude plugin install web-vuln-audit
 
 ---
 
+### security-report
+
+Command `/security-report`: un **orchestratore di sicurezza** che produce **un unico report prioritizzato** coordinando i migliori strumenti disponibili sulla macchina — plugin Claude Code e tool CLI — invece di rifare tutto a mano. È il livello *orchestratore* sopra gli altri plugin: `/senior-engineer:security` e `/security-review` fanno review del **codice**, `/vuln-audit` fa **DAST** sul sito live; qui vengono messi in fila insieme a SAST/segreti/dipendenze/container e i risultati fusi in un report solo.
+
+**Conferma interattiva:** all'avvio chiede sempre *quali* dimensioni eseguire (SAST codice · DAST sito live · segreti · dipendenze · container · conformità OWASP), il target (repo e/o URL) e — solo per il DAST — autorizzazione e modalità (passiva/attiva, stessi guardrail di `/vuln-audit`). Poi mostra il piano e attende il via.
+
+**Strumento preferito → fallback**, per non ridurre mai la copertura in silenzio:
+
+| Dimensione | Preferito | Fallback |
+|------------|-----------|----------|
+| **SAST** | `semgrep --config auto` | `/senior-engineer:security` + `/security-review` (review LLM) |
+| **Segreti** | `gitleaks` / `trufflehog` | Secret Scanner → grep di pattern su repo e history git |
+| **Dipendenze** | `osv-scanner` / `grype` | `composer audit` + `npm audit` |
+| **DAST** | `/vuln-audit <url>` | `nmap`/`nikto`/`nuclei` → check passivi via `curl`/`openssl` |
+| **Container** | `trivy` | `grype` → skip con nota |
+
+Esegue le dimensioni su **subagenti paralleli read-only** (ognuno restituisce solo una tabella strutturata) e produce un report unico con dedup tra fonti, gravità normalizzata (Critica→Info), mappatura **OWASP Top 10**, tabella di copertura e separazione quick-win vs interventi strutturali. I segreti sono sempre **oscurati**. Nessuna dipendenza è obbligatoria: funziona anche solo con i fallback base.
+
+**Installazione:**
+
+```bash
+claude plugin install security-report
+```
+
+**Utilizzo:**
+
+```
+/security-report .                              # solo repo corrente
+/security-report https://www.sito.it            # solo sito live
+/security-report . https://www.sito.it          # repo + sito live
+```
+
+---
+
 ## Struttura del repository
 
 ```
@@ -375,6 +412,10 @@ claude-skills/
 │   ├── .claude-plugin/plugin.json
 │   ├── commands/vuln-audit.md
 │   └── README.md
+├── security-report-plugin/
+│   ├── .claude-plugin/plugin.json
+│   ├── commands/security-report.md
+│   └── README.md
 └── README.md                     ← questo file
 ```
 
@@ -423,6 +464,10 @@ Aggiornamenti notevoli dei plugin. La versione corrente di ogni plugin è nella 
 ### web-vuln-audit
 
 - **1.0.0** — Release iniziale: command `/vuln-audit` per l'audit di vulnerabilità dinamico (DAST) a imbuto (ricognizione → superficie → profondità) su un sito web live. Due modalità (passiva su qualsiasi dominio, attiva solo su domini autorizzati con `nmap`/`nikto`/ZAP/`nuclei`/`sqlmap`), regola zero di autorizzazione con doppia conferma, fan-out su subagenti read-only e report finale prioritizzato con mappatura OWASP Top 10 e separazione quick-win vs interventi strutturali.
+
+### security-report
+
+- **1.0.0** — Release iniziale: command `/security-report`, orchestratore che produce un report di sicurezza unificato coordinando i migliori strumenti disponibili (SAST con `semgrep`, DAST con `/vuln-audit`, segreti con `gitleaks`, dipendenze con `osv-scanner`/`composer audit`/`npm audit`, container con `trivy`), con fallback ai plugin `/senior-engineer:security` e `/security-review`. Conferma interattiva dei controlli da eseguire, detect delle capacità con fallback dichiarati, esecuzione su subagenti paralleli read-only, dedup tra fonti e report unico con gravità normalizzata, mappatura OWASP Top 10 e tabella di copertura.
 
 ---
 

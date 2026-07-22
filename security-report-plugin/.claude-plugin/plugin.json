@@ -1,0 +1,22 @@
+{
+  "name": "security-report",
+  "version": "1.0.0",
+  "description": "Command /security-report: report di sicurezza unificato che orchestra i migliori strumenti disponibili (SAST codice, DAST sito live, segreti, dipendenze, container, conformità OWASP), chiedendo conferma sui controlli da eseguire e usando fallback quando un tool manca.",
+  "author": {
+    "name": "Enesi"
+  },
+  "keywords": [
+    "security",
+    "orchestrator",
+    "report",
+    "sast",
+    "dast",
+    "secrets",
+    "dependencies",
+    "owasp",
+    "audit"
+  ],
+  "commands": [
+    "./commands/security-report.md"
+  ]
+}

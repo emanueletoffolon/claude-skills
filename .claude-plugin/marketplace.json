@@ -45,6 +45,11 @@
       "name": "web-vuln-audit",
       "source": "./web-vuln-audit-plugin",
       "description": "Command /vuln-audit: audit di vulnerabilità dinamico (DAST) a imbuto su un sito web live. Modalità passiva su qualsiasi dominio, attiva solo su domini autorizzati (nmap/nikto/ZAP/nuclei/sqlmap), con report prioritizzato e mappatura OWASP."
+    },
+    {
+      "name": "security-report",
+      "source": "./security-report-plugin",
+      "description": "Command /security-report: report di sicurezza unificato che orchestra i migliori strumenti disponibili (SAST codice, DAST sito live, segreti, dipendenze, container, conformità OWASP), chiedendo conferma sui controlli da eseguire e usando fallback quando un tool manca."
     }
   ]
 }
